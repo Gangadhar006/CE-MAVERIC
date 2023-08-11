@@ -9,7 +9,7 @@ public interface IAccountService {
 
     AccountDto updateAccount(Long customerId, Long accountId, AccountDto accountDto);
 
-    AccountDto deleteAccount(Long customerId,Long accountId);
+    String deleteAccount(Long customerId,Long accountId);
 
     List<AccountDto> findAllAccounts(Long id);
 }

@@ -3,20 +3,22 @@ package org.maveric.currencyexchange.serviceimpl;
 import org.maveric.currencyexchange.dtos.CustomerDto;
 import org.maveric.currencyexchange.entity.Customer;
 import org.maveric.currencyexchange.enums.GenderType;
+import org.maveric.currencyexchange.exception.CustomerNotFoundException;
 import org.maveric.currencyexchange.repository.ICustomerRepository;
 import org.maveric.currencyexchange.service.ICustomerService;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @Service
 public class CustomerServiceImpl implements ICustomerService {
+    public static final Logger logger = LoggerFactory.getLogger(CustomerServiceImpl.class);
     private ModelMapper mapper;
     private ICustomerRepository customerRepo;
 
@@ -28,38 +30,42 @@ public class CustomerServiceImpl implements ICustomerService {
     @Override
     @Transactional
     public CustomerDto createCustomer(CustomerDto customerDto) {
-        if (!Objects.isNull(customerDto)) {
-            Customer customer = mapper.map(customerDto, Customer.class);
-            customer = customerRepo.save(customer);
-            customerDto = mapper.map(customer, CustomerDto.class);
-            return customerDto;
-        }
-        return null;
+        logger.info("Creating Customer: {}", customerDto.getFirstName());
+
+        Customer customer = mapper.map(customerDto, Customer.class);
+        customer = customerRepo.save(customer);
+        customerDto = mapper.map(customer, CustomerDto.class);
+
+        logger.info("Created Customer Successfully: {}", customerDto.getFirstName());
+
+        return customerDto;
     }
 
     @Override
     @Transactional
     public CustomerDto updateCustomer(Long customerId, CustomerDto customerDto) {
+        logger.info("Updating Customer with CUSTOMER-ID: {}", customerId);
 
-        //throw CustomerNotFoundException here
-
-        Optional<Customer> customer = customerRepo.findById(customerId);
-
-        if (!Objects.isNull(customerDto) && customer.isPresent()) {
-            Customer customerCopy = customer.get();
-            updateFirstName(customerCopy, customerDto.getFirstName());
-            updateLastName(customerCopy, customerDto.getLastName());
-            updateDobAndAge(customerCopy, customerDto.getDob());
-            updateEmail(customerCopy, customerDto.getEmail());
-            updateGender(customerCopy, customerDto.getGender());
-            updatePhone(customerCopy, customerDto.getPhone());
-            customerDto=mapper.map(customerCopy, CustomerDto.class);
-        }
+        Customer customer = customerRepo.findById(customerId).orElseThrow(
+                () -> {
+                    logger.error("Customer Not Found With ID: {}", customerId);
+                    return new CustomerNotFoundException("Customer Not Found With ID: " + customerId);
+                }
+        );
+        updateFirstName(customer, customerDto.getFirstName());
+        updateLastName(customer, customerDto.getLastName());
+        updateDobAndAge(customer, customerDto.getDob());
+        updateEmail(customer, customerDto.getEmail());
+        updateGender(customer, customerDto.getGender());
+        updatePhone(customer, customerDto.getPhone());
+        customerDto = mapper.map(customer, CustomerDto.class);
+        logger.info(" Successfully updated Customer with CUSTOMER-ID: {}", customerId);
         return customerDto;
     }
 
     @Override
     public List<CustomerDto> findAllCustomers() {
+        logger.info(" Fetching All Customers");
         List<Customer> customers = customerRepo.findAll();
         return customers.stream()
                 .map(customer -> mapper.map(customer, CustomerDto.class))
@@ -68,14 +74,18 @@ public class CustomerServiceImpl implements ICustomerService {
 
     @Override
     @Transactional
-    public String deleteCustomer(Long id) {
+    public String deleteCustomer(Long customerId) {
+        logger.info(" Deleting Customer With CUSTOMER-ID: {}", customerId);
 
-        //throw CustomerNotFoundException here
-
-        Optional<Customer> customer = customerRepo.findById(id);
-        if (customer.isPresent())
-            customerRepo.delete(customer.get());
-        return "Customer deleted Successfully";
+        Customer customer = customerRepo.findById(customerId).orElseThrow(
+                () -> {
+                    logger.error("Customer Not Found With ID: {}", customerId);
+                    return new CustomerNotFoundException("Customer Not Found With ID: " + customerId);
+                }
+        );
+        customerRepo.delete(customer);
+        logger.info(" Successfully Deleted Customer With CUSTOMER-ID: {}", customerId);
+        return "Customer Deleted Successfully";
     }
 
     private void updateFirstName(Customer customer, String firstName) {

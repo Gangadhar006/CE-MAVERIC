@@ -1,11 +1,9 @@
 package org.maveric.currencyexchange.dtos;
 
-import org.maveric.currencyexchange.enums.GenderType;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.maveric.currencyexchange.enums.GenderType;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -15,7 +13,9 @@ import java.util.List;
 @Getter
 public class CustomerDto {
     private Long id;
+    @NotBlank
     private String firstName;
+    @NotBlank
     private String lastName;
     @Past
     private LocalDate dob;
@@ -27,5 +27,5 @@ public class CustomerDto {
     private String phone;
     private Date createdAt;
     private Date updatedAt;
-    private List<AccountDto> accountDtos;
+    private List<AccountDto> accounts;
 }

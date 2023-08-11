@@ -40,7 +40,11 @@ public class Customer {
     private Date createdAt;
     @UpdateTimestamp
     private Date updatedAt;
-    @OneToMany(mappedBy = "customer",cascade = CascadeType.ALL)
+    @OneToMany(
+            mappedBy = "customer",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.EAGER
+    )
     private List<Account> accounts;
 
     @PrePersist

@@ -3,6 +3,9 @@ package org.maveric.currencyexchange.serviceimpl;
 import org.maveric.currencyexchange.dtos.AccountDto;
 import org.maveric.currencyexchange.entity.Account;
 import org.maveric.currencyexchange.entity.Customer;
+import org.maveric.currencyexchange.exception.AccountMisMatchException;
+import org.maveric.currencyexchange.exception.AccountNotFoundException;
+import org.maveric.currencyexchange.exception.CustomerNotFoundException;
 import org.maveric.currencyexchange.repository.IAccountRepository;
 import org.maveric.currencyexchange.repository.ICustomerRepository;
 import org.maveric.currencyexchange.service.IAccountService;
@@ -13,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -32,85 +34,113 @@ public class AccountServiceImpl implements IAccountService {
     @Override
     @Transactional
     public AccountDto createAccount(Long customerId, AccountDto accountDto) {
-
-        //throw CustomerNotFoundException
-
         Optional<Customer> customer = customerRepo.findById(customerId);
-        if (!Objects.isNull(accountDto)) {
+
+        if (customer.isEmpty()) {
+            logger.error("Customer Not Found With ID: {}", customerId);
+            throw new CustomerNotFoundException("Customer Not Found With ID: " + customerId);
+        }
+
+        if (accountDto != null) {
             Account account = mapper.map(accountDto, Account.class);
             account.setCustomer(customer.get());
             account = accountRepo.save(account);
             accountDto = mapper.map(account, AccountDto.class);
+            logger.info("Account created successfully for CUSTOMER-ID: {}", customerId);
         }
+
         return accountDto;
     }
+
 
     @Override
     @Transactional
     public AccountDto updateAccount(Long customerId, Long accountId, AccountDto accountDto) {
-
-        //throw CustomerNotFoundException
+        logger.info("Updating account with CUSTOMER-ID: {}  ACCOUNT-ID: {}", customerId, accountId);
 
         Optional<Customer> customer = customerRepo.findById(customerId);
 
-        //throw AccountNotFoundException
-
-        Optional<Account> account = accountRepo.findById(accountId);
-        accountDto = updateAccountUtil(customerId, accountId, accountDto);
-
+        if (customer.isPresent())
+            accountDto = updateAccountUtil(customerId, accountId, accountDto);
+        else {
+            logger.error("Customer Not Found With ID: {}", customerId);
+            throw new CustomerNotFoundException("Customer Not Found With ID: " + customerId);
+        }
         return accountDto;
     }
 
     public AccountDto updateAccountUtil(Long customerId, Long accountId, AccountDto accountDto) {
-
-
-        if (!Objects.isNull(accountDto)) {
-
-            //throw AccountNotFoundException
-
-            Optional<Account> account = accountRepo.findById(accountId);
-            Account accountCopy = account.get();
-            boolean isAccountOwner = accountCopy.getCustomer().getId().equals(customerId);
-
-            // throw AccountMisMatchException
-
-            if (isAccountOwner) {
-                if (accountDto.getAmount() != null)
-                    accountCopy.setAmount(accountDto.getAmount());
-
-                if (accountDto.getActive() != null)
-                    accountCopy.setActive(accountDto.getActive());
-
-                if (accountDto.getAccountType() != null)
-                    accountCopy.setAccountType(accountDto.getAccountType());
-
-                if (accountDto.getCurrency() != null)
-                    accountCopy.setCurrency(accountDto.getCurrency());
-            }
-
-            accountCopy = accountRepo.save(accountCopy);
-            accountDto = mapper.map(accountCopy, AccountDto.class);
+        if (accountDto == null) {
+            return null;
         }
+
+        Optional<Account> account = accountRepo.findById(accountId);
+
+        if (account.isEmpty()) {
+            logger.error("Account Not Found With ID: {}", accountId);
+            throw new AccountNotFoundException("Account Not Found With ID: " + accountId);
+        }
+
+        Account accountCopy = account.get();
+        boolean isAccountOwner = accountCopy.getCustomer().getId().equals(customerId);
+
+        if (!isAccountOwner) {
+            logger.error("Account Mis Match CUSTOMER-ID: {}  :  ACCOUNT-ID: {}", customerId, accountId);
+            throw new AccountMisMatchException("It's Not Your Account " + accountId);
+        }
+
+        if (accountDto.getAmount() != null) {
+            accountCopy.setAmount(accountDto.getAmount());
+        }
+
+        if (accountDto.getActive() != null) {
+            accountCopy.setActive(accountDto.getActive());
+        }
+
+        if (accountDto.getAccountType() != null) {
+            accountCopy.setAccountType(accountDto.getAccountType());
+        }
+
+        if (accountDto.getCurrency() != null) {
+            accountCopy.setCurrency(accountDto.getCurrency());
+        }
+
+        accountCopy = accountRepo.save(accountCopy);
+        accountDto = mapper.map(accountCopy, AccountDto.class);
+
         return accountDto;
     }
 
 
     @Override
     @Transactional
-    public AccountDto deleteAccount(Long customerId, Long accountId) {
+    public String deleteAccount(Long customerId, Long accountId) {
+        Account account = accountRepo.findById(accountId)
+                .orElseThrow(() -> {
+                    logger.error("Account Not Found With ID: {}", accountId);
+                    return new AccountNotFoundException("Account Not Found With ID: " + accountId);
+                });
 
-        //throw CustomerNotFoundException
-
-        Optional<Customer> customer = customerRepo.findById(customerId);
-        Optional<Account> account = accountRepo.findById(accountId);
-        boolean isAccountOwner = account.get().getCustomer().getId().equals(customerId);
-        if (isAccountOwner)
-            accountRepo.delete(account.get());
-        return null;
+        if (!account.getCustomer().getId().equals(customerId)) {
+            logger.error("Account Mis Match CUSTOMER-ID: {}  :  ACCOUNT-ID: {}", customerId, accountId);
+            throw new AccountMisMatchException("It's Not Your Account " + accountId);
+        } else {
+            accountRepo.delete(account);
+            logger.info("Account deleted successfully with CUSTOMER-ID: {}  ACCOUNT-ID: {}", customerId, accountId);
+        }
+        return "account deleted successfully";
     }
 
     @Override
     public List<AccountDto> findAllAccounts(Long customerId) {
+        logger.info("Fetching All Customers with CUSTOMER-ID: {}", customerId);
+
+        customerRepo.findById(customerId).orElseThrow(
+                () -> {
+                    logger.error("Customer Not Found With ID: {}", customerId);
+                    throw new CustomerNotFoundException("Customer Not Found With ID: " + customerId);
+                }
+        );
         List<Account> accounts = accountRepo.findByCustomerId(customerId);
         return accounts.stream()
                 .map(account -> mapper.map(account, AccountDto.class))

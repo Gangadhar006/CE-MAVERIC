@@ -27,7 +27,7 @@ public class Account {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private AccountType accountType;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")
     private Customer customer;
     @Column(nullable = false)
