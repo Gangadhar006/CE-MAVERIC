@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AccountServiceImpl implements IAccountService {
@@ -34,21 +33,18 @@ public class AccountServiceImpl implements IAccountService {
     @Override
     @Transactional
     public AccountDto createAccount(Long customerId, AccountDto accountDto) {
-        Optional<Customer> customer = customerRepo.findById(customerId);
+        Customer customer = customerRepo.findById(customerId).orElseThrow(
+                () -> {
+                    logger.error("Customer Not Found");
+                    throw new CustomerNotFoundException("Customer Not Found");
+                }
+        );
 
-        if (customer.isEmpty()) {
-            logger.error("Customer Not Found");
-            throw new CustomerNotFoundException("Customer Not Found");
-        }
-
-        if (accountDto != null) {
-            Account account = mapper.map(accountDto, Account.class);
-            account.setCustomer(customer.get());
-            account = accountRepo.save(account);
-            accountDto = mapper.map(account, AccountDto.class);
-            logger.info("Account created successfully for CUSTOMER");
-        }
-
+        Account account = mapper.map(accountDto, Account.class);
+        account.setCustomer(customer);
+        account = accountRepo.save(account);
+        accountDto = mapper.map(account, AccountDto.class);
+        logger.info("Account created successfully for CUSTOMER");
         return accountDto;
     }
 
@@ -58,57 +54,41 @@ public class AccountServiceImpl implements IAccountService {
     public AccountDto updateAccount(Long customerId, Long accountId, AccountDto accountDto) {
         logger.info("Updating account with CUSTOMER");
 
-        Optional<Customer> customer = customerRepo.findById(customerId);
+        customerRepo.findById(customerId).orElseThrow(
+                () -> {
+                    logger.error("Customer Not Found");
+                    throw new CustomerNotFoundException("Customer Not Found");
+                }
+        );
 
-        if (customer.isPresent())
-            accountDto = updateAccountUtil(customerId, accountId, accountDto);
-        else {
-            logger.error("Customer Not Found");
-            throw new CustomerNotFoundException("Customer Not Found");
-        }
+        accountDto = updateAccountUtil(customerId, accountId, accountDto);
         return accountDto;
     }
 
     public AccountDto updateAccountUtil(Long customerId, Long accountId, AccountDto accountDto) {
-        if (accountDto == null) {
-            return null;
-        }
+        Account account = accountRepo.findById(accountId).orElseThrow(
+                () -> {
+                    logger.error("Account Not Found");
+                    throw new AccountNotFoundException("Account Not Found");
+                }
+        );
 
-        Optional<Account> account = accountRepo.findById(accountId);
+        boolean isAccountOwner = account.getCustomer().getId().equals(customerId);
 
-        if (account.isEmpty()) {
-            logger.error("Account Not Found");
-            throw new AccountNotFoundException("Account Not Found");
-        }
+        if (isAccountOwner) {
+            account.setAmount(accountDto.getAmount());
+            account.setActive(accountDto.getActive());
+            account.setAccountType(accountDto.getAccountType());
+            account.setCurrency(accountDto.getCurrency());
 
-        Account accountCopy = account.get();
-        boolean isAccountOwner = accountCopy.getCustomer().getId().equals(customerId);
+            account = accountRepo.save(account);
+            accountDto = mapper.map(account, AccountDto.class);
 
-        if (!isAccountOwner) {
+            return accountDto;
+        } else {
             logger.error("Account Mis Match CUSTOMER");
             throw new AccountMisMatchException("It's Not Your Account");
         }
-
-        if (accountDto.getAmount() != null) {
-            accountCopy.setAmount(accountDto.getAmount());
-        }
-
-        if (accountDto.getActive() != null) {
-            accountCopy.setActive(accountDto.getActive());
-        }
-
-        if (accountDto.getAccountType() != null) {
-            accountCopy.setAccountType(accountDto.getAccountType());
-        }
-
-        if (accountDto.getCurrency() != null) {
-            accountCopy.setCurrency(accountDto.getCurrency());
-        }
-
-        accountCopy = accountRepo.save(accountCopy);
-        accountDto = mapper.map(accountCopy, AccountDto.class);
-
-        return accountDto;
     }
 
 
@@ -121,14 +101,16 @@ public class AccountServiceImpl implements IAccountService {
                     return new AccountNotFoundException("Account Not Found");
                 });
 
-        if (!account.getCustomer().getId().equals(customerId)) {
-            logger.error("Account Mis Match");
-            throw new AccountMisMatchException("It's Not Your Account");
-        } else {
+        boolean isAccountOwner = account.getCustomer().getId().equals(customerId);
+
+        if (isAccountOwner) {
             accountRepo.delete(account);
             logger.info("Account deleted successfully");
+            return "account deleted successfully";
+        } else {
+            logger.error("Account Mis Match");
+            throw new AccountMisMatchException("It's Not Your Account");
         }
-        return "account deleted successfully";
     }
 
     @Override

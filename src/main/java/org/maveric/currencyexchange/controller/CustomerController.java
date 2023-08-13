@@ -29,7 +29,7 @@ public class CustomerController {
                 .body(customerService.createCustomer(customerDto));
     }
 
-    @PatchMapping(value = "/{customerId}")
+    @PutMapping(value = "/{customerId}")
     public ResponseEntity<CustomerDto> updateCustomer(
             @PathVariable("customerId") Long customerId,
             @Valid @RequestBody CustomerDto customerDto) {

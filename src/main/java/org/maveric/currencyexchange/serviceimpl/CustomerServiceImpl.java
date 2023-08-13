@@ -84,7 +84,7 @@ public class CustomerServiceImpl implements ICustomerService {
                 }
         );
         customerRepo.delete(customer);
-        logger.info(" Successfully Deleted Customer"    );
+        logger.info(" Successfully Deleted Customer");
         return "Customer Deleted Successfully";
     }
 

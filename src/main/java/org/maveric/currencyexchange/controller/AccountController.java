@@ -28,7 +28,7 @@ public class AccountController {
                 .body(accountService.createAccount(customerId, accountDto));
     }
 
-    @PatchMapping(value = "/{accountId}")
+    @PutMapping(value = "/{accountId}")
     public ResponseEntity<AccountDto> updateAccount(@PathVariable("customerId") Long customerId,
                                                     @PathVariable("accountId") Long accountId,
                                                     @RequestBody AccountDto accountDto) {
