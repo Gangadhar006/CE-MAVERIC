@@ -37,8 +37,8 @@ public class AccountServiceImpl implements IAccountService {
         Optional<Customer> customer = customerRepo.findById(customerId);
 
         if (customer.isEmpty()) {
-            logger.error("Customer Not Found With ID: {}", customerId);
-            throw new CustomerNotFoundException("Customer Not Found With ID: " + customerId);
+            logger.error("Customer Not Found");
+            throw new CustomerNotFoundException("Customer Not Found");
         }
 
         if (accountDto != null) {
@@ -46,7 +46,7 @@ public class AccountServiceImpl implements IAccountService {
             account.setCustomer(customer.get());
             account = accountRepo.save(account);
             accountDto = mapper.map(account, AccountDto.class);
-            logger.info("Account created successfully for CUSTOMER-ID: {}", customerId);
+            logger.info("Account created successfully for CUSTOMER");
         }
 
         return accountDto;
@@ -56,15 +56,15 @@ public class AccountServiceImpl implements IAccountService {
     @Override
     @Transactional
     public AccountDto updateAccount(Long customerId, Long accountId, AccountDto accountDto) {
-        logger.info("Updating account with CUSTOMER-ID: {}  ACCOUNT-ID: {}", customerId, accountId);
+        logger.info("Updating account with CUSTOMER");
 
         Optional<Customer> customer = customerRepo.findById(customerId);
 
         if (customer.isPresent())
             accountDto = updateAccountUtil(customerId, accountId, accountDto);
         else {
-            logger.error("Customer Not Found With ID: {}", customerId);
-            throw new CustomerNotFoundException("Customer Not Found With ID: " + customerId);
+            logger.error("Customer Not Found");
+            throw new CustomerNotFoundException("Customer Not Found");
         }
         return accountDto;
     }
@@ -77,16 +77,16 @@ public class AccountServiceImpl implements IAccountService {
         Optional<Account> account = accountRepo.findById(accountId);
 
         if (account.isEmpty()) {
-            logger.error("Account Not Found With ID: {}", accountId);
-            throw new AccountNotFoundException("Account Not Found With ID: " + accountId);
+            logger.error("Account Not Found");
+            throw new AccountNotFoundException("Account Not Found");
         }
 
         Account accountCopy = account.get();
         boolean isAccountOwner = accountCopy.getCustomer().getId().equals(customerId);
 
         if (!isAccountOwner) {
-            logger.error("Account Mis Match CUSTOMER-ID: {}  :  ACCOUNT-ID: {}", customerId, accountId);
-            throw new AccountMisMatchException("It's Not Your Account " + accountId);
+            logger.error("Account Mis Match CUSTOMER");
+            throw new AccountMisMatchException("It's Not Your Account");
         }
 
         if (accountDto.getAmount() != null) {
@@ -117,28 +117,28 @@ public class AccountServiceImpl implements IAccountService {
     public String deleteAccount(Long customerId, Long accountId) {
         Account account = accountRepo.findById(accountId)
                 .orElseThrow(() -> {
-                    logger.error("Account Not Found With ID: {}", accountId);
-                    return new AccountNotFoundException("Account Not Found With ID: " + accountId);
+                    logger.error("Account Not Found");
+                    return new AccountNotFoundException("Account Not Found");
                 });
 
         if (!account.getCustomer().getId().equals(customerId)) {
-            logger.error("Account Mis Match CUSTOMER-ID: {}  :  ACCOUNT-ID: {}", customerId, accountId);
-            throw new AccountMisMatchException("It's Not Your Account " + accountId);
+            logger.error("Account Mis Match");
+            throw new AccountMisMatchException("It's Not Your Account");
         } else {
             accountRepo.delete(account);
-            logger.info("Account deleted successfully with CUSTOMER-ID: {}  ACCOUNT-ID: {}", customerId, accountId);
+            logger.info("Account deleted successfully");
         }
         return "account deleted successfully";
     }
 
     @Override
     public List<AccountDto> findAllAccounts(Long customerId) {
-        logger.info("Fetching All Customers with CUSTOMER-ID: {}", customerId);
+        logger.info("Fetching All Customers with CUSTOMER-ID");
 
         customerRepo.findById(customerId).orElseThrow(
                 () -> {
-                    logger.error("Customer Not Found With ID: {}", customerId);
-                    throw new CustomerNotFoundException("Customer Not Found With ID: " + customerId);
+                    logger.error("Customer Not Found");
+                    throw new CustomerNotFoundException("Customer Not Found");
                 }
         );
         List<Account> accounts = accountRepo.findByCustomerId(customerId);

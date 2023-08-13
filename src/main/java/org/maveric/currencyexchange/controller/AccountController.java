@@ -23,7 +23,7 @@ public class AccountController {
     @PostMapping
     public ResponseEntity<AccountDto> createAccount(@PathVariable("customerId") Long customerId,
                                                     @RequestBody AccountDto accountDto) {
-        logger.info("Requesting account creation for CUSTOMER-ID: {}", customerId);
+        logger.info("Requesting account creation");
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(accountService.createAccount(customerId, accountDto));
     }
@@ -32,14 +32,14 @@ public class AccountController {
     public ResponseEntity<AccountDto> updateAccount(@PathVariable("customerId") Long customerId,
                                                     @PathVariable("accountId") Long accountId,
                                                     @RequestBody AccountDto accountDto) {
-        logger.info("Requesting account updation for CUSTOMER-ID: {}   ACCOUNT-ID: {}", customerId, accountId);
+        logger.info("Requesting account updation");
         return ResponseEntity.status(HttpStatus.OK)
                 .body(accountService.updateAccount(customerId, accountId, accountDto));
     }
 
     @GetMapping
     public ResponseEntity<List<AccountDto>> findAllAccounts(@PathVariable("customerId") Long customerId) {
-        logger.info("Requesting account fetching for CUSTOMER-ID: {}", customerId);
+        logger.info("Requesting account fetching");
         return ResponseEntity.status(HttpStatus.OK)
                 .body(accountService.findAllAccounts(customerId));
     }
@@ -47,7 +47,7 @@ public class AccountController {
     @DeleteMapping(value = "/{accountId}")
     public ResponseEntity<String> deleteAccount(@PathVariable("customerId") Long customerId,
                                                 @PathVariable("accountId") Long accountId) {
-        logger.info("Requesting account deletion for CUSTOMER-ID: {}   ACCOUNT-ID: {}", customerId, accountId);
+        logger.info("Requesting account deletion");
         return ResponseEntity.status(HttpStatus.OK)
                 .body(accountService.deleteAccount(customerId, accountId));
     }

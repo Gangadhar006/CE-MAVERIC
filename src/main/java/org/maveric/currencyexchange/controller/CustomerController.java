@@ -24,7 +24,7 @@ public class CustomerController {
 
     @PostMapping
     public ResponseEntity<CustomerDto> createCustomer(@Valid @RequestBody CustomerDto customerDto) {
-        logger.info("Requesting customer creation: {}", customerDto.getFirstName());
+        logger.info("Requesting customer creation");
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(customerService.createCustomer(customerDto));
     }
@@ -33,7 +33,7 @@ public class CustomerController {
     public ResponseEntity<CustomerDto> updateCustomer(
             @PathVariable("customerId") Long customerId,
             @Valid @RequestBody CustomerDto customerDto) {
-        logger.info("Requesting customer updation for CUSTOMER-ID: {}", customerId);
+        logger.info("Requesting customer updation for CUSTOMER");
         return ResponseEntity.status(HttpStatus.OK)
                 .body(customerService.updateCustomer(customerId, customerDto));
 
@@ -48,7 +48,7 @@ public class CustomerController {
 
     @DeleteMapping(value = "/{customerId}")
     public ResponseEntity<String> deleteCustomer(@PathVariable("customerId") Long customerId) {
-        logger.info("Requesting customer deletion for CUSTOMER-ID: {}", customerId);
+        logger.info("Requesting customer deletion for CUSTOMER");
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(customerService.deleteCustomer(customerId));
     }
 }

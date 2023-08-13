@@ -30,13 +30,13 @@ public class CustomerServiceImpl implements ICustomerService {
     @Override
     @Transactional
     public CustomerDto createCustomer(CustomerDto customerDto) {
-        logger.info("Creating Customer: {}", customerDto.getFirstName());
+        logger.info("Creating Customer");
 
         Customer customer = mapper.map(customerDto, Customer.class);
         customer = customerRepo.save(customer);
         customerDto = mapper.map(customer, CustomerDto.class);
 
-        logger.info("Created Customer Successfully: {}", customerDto.getFirstName());
+        logger.info("Created Customer Successfully");
 
         return customerDto;
     }
@@ -44,12 +44,12 @@ public class CustomerServiceImpl implements ICustomerService {
     @Override
     @Transactional
     public CustomerDto updateCustomer(Long customerId, CustomerDto customerDto) {
-        logger.info("Updating Customer with CUSTOMER-ID: {}", customerId);
+        logger.info("Updating Customer");
 
         Customer customer = customerRepo.findById(customerId).orElseThrow(
                 () -> {
-                    logger.error("Customer Not Found With ID: {}", customerId);
-                    return new CustomerNotFoundException("Customer Not Found With ID: " + customerId);
+                    logger.error("Customer Not Found");
+                    return new CustomerNotFoundException("Customer Not Found");
                 }
         );
         updateFirstName(customer, customerDto.getFirstName());
@@ -59,7 +59,7 @@ public class CustomerServiceImpl implements ICustomerService {
         updateGender(customer, customerDto.getGender());
         updatePhone(customer, customerDto.getPhone());
         customerDto = mapper.map(customer, CustomerDto.class);
-        logger.info(" Successfully updated Customer with CUSTOMER-ID: {}", customerId);
+        logger.info(" Successfully updated Customer");
         return customerDto;
     }
 
@@ -75,16 +75,16 @@ public class CustomerServiceImpl implements ICustomerService {
     @Override
     @Transactional
     public String deleteCustomer(Long customerId) {
-        logger.info(" Deleting Customer With CUSTOMER-ID: {}", customerId);
+        logger.info(" Deleting Customer");
 
         Customer customer = customerRepo.findById(customerId).orElseThrow(
                 () -> {
-                    logger.error("Customer Not Found With ID: {}", customerId);
-                    return new CustomerNotFoundException("Customer Not Found With ID: " + customerId);
+                    logger.error("Customer Not Found");
+                    return new CustomerNotFoundException("Customer Not Found");
                 }
         );
         customerRepo.delete(customer);
-        logger.info(" Successfully Deleted Customer With CUSTOMER-ID: {}", customerId);
+        logger.info(" Successfully Deleted Customer"    );
         return "Customer Deleted Successfully";
     }
 
