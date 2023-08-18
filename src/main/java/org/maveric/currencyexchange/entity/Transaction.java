@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -17,8 +18,8 @@ public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private String srcAccount;
-    private String destAccount;
+    private Long srcAccount;
+    private Long destAccount;
     private Double amount;
     @CreationTimestamp
     private Date time;
@@ -26,5 +27,5 @@ public class Transaction {
     private String currencyPair;
 
     @ManyToOne
-    private Account account;
+    private Customer customer;
 }

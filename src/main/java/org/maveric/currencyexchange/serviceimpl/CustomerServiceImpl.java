@@ -1,9 +1,9 @@
 package org.maveric.currencyexchange.serviceimpl;
 
-import org.maveric.currencyexchange.dtos.CustomerDto;
 import org.maveric.currencyexchange.entity.Customer;
-import org.maveric.currencyexchange.enums.GenderType;
 import org.maveric.currencyexchange.exception.CustomerNotFoundException;
+import org.maveric.currencyexchange.payload.CustomerRequest;
+import org.maveric.currencyexchange.payload.CustomerResponse;
 import org.maveric.currencyexchange.repository.ICustomerRepository;
 import org.maveric.currencyexchange.service.ICustomerService;
 import org.modelmapper.ModelMapper;
@@ -27,102 +27,67 @@ public class CustomerServiceImpl implements ICustomerService {
         this.customerRepo = customerRepo;
     }
 
-    @Override
     @Transactional
-    public CustomerDto createCustomer(CustomerDto customerDto) {
+    @Override
+    public CustomerResponse createCustomer(CustomerRequest customerRequest) {
         logger.info("Creating Customer");
-
-        Customer customer = mapper.map(customerDto, Customer.class);
+        Customer customer = mapper.map(customerRequest, Customer.class);
         customer = customerRepo.save(customer);
-        customerDto = mapper.map(customer, CustomerDto.class);
-
         logger.info("Created Customer Successfully");
-
-        return customerDto;
+        return mapper.map(customer, CustomerResponse.class);
     }
 
-    @Override
     @Transactional
-    public CustomerDto updateCustomer(Long customerId, CustomerDto customerDto) {
+    @Override
+    public CustomerResponse updateCustomer(long customerId, CustomerRequest customerRequest) {
         logger.info("Updating Customer");
 
-        Customer customer = customerRepo.findById(customerId).orElseThrow(
-                () -> {
-                    logger.error("Customer Not Found");
-                    return new CustomerNotFoundException("Customer Not Found");
-                }
-        );
-        updateFirstName(customer, customerDto.getFirstName());
-        updateLastName(customer, customerDto.getLastName());
-        updateDobAndAge(customer, customerDto.getDob());
-        updateEmail(customer, customerDto.getEmail());
-        updateGender(customer, customerDto.getGender());
-        updatePhone(customer, customerDto.getPhone());
-        customerDto = mapper.map(customer, CustomerDto.class);
+        Customer customer = verifyCustomer(customerId);
+
+        customer.setFirstName(customerRequest.getFirstName());
+        customer.setLastName(customerRequest.getLastName());
+        customer.setEmail(customerRequest.getEmail());
+        customer.setGender(customerRequest.getGender());
+        customer.setPhone(customerRequest.getPhone());
+        updateDobAndAge(customer, customerRequest.getDob());
+
         logger.info(" Successfully updated Customer");
-        return customerDto;
+
+        return mapper.map(customer, CustomerResponse.class);
     }
 
     @Override
-    public List<CustomerDto> findAllCustomers() {
+    public List<CustomerResponse> findAllCustomers() {
         logger.info(" Fetching All Customers");
         List<Customer> customers = customerRepo.findAll();
         return customers.stream()
-                .map(customer -> mapper.map(customer, CustomerDto.class))
+                .map(customer -> mapper.map(customer, CustomerResponse.class))
                 .toList();
     }
 
     @Override
     @Transactional
-    public String deleteCustomer(Long customerId) {
+    public String deleteCustomer(long customerId) {
         logger.info(" Deleting Customer");
+        Customer customer = verifyCustomer(customerId);
 
-        Customer customer = customerRepo.findById(customerId).orElseThrow(
-                () -> {
-                    logger.error("Customer Not Found");
-                    return new CustomerNotFoundException("Customer Not Found");
-                }
-        );
         customerRepo.delete(customer);
         logger.info(" Successfully Deleted Customer");
         return "Customer Deleted Successfully";
     }
 
-    private void updateFirstName(Customer customer, String firstName) {
-        if (firstName != null && !firstName.isBlank()) {
-            customer.setFirstName(firstName);
-        }
-    }
-
-    private void updateLastName(Customer customer, String lastName) {
-        if (lastName != null && !lastName.isBlank()) {
-            customer.setLastName(lastName);
-        }
+    public Customer verifyCustomer(long customerId) {
+        return customerRepo.findById(customerId).orElseThrow(
+                () -> {
+                    logger.error("Customer Not Found");
+                    return new CustomerNotFoundException("Customer Not Found");
+                }
+        );
     }
 
     private void updateDobAndAge(Customer customer, LocalDate dob) {
-        if (dob != null) {
-            customer.setDob(dob);
-            LocalDate currentDate = LocalDate.now();
-            customer.setAge(Period.between(dob, currentDate).getYears());
-        }
-    }
-
-    private void updateEmail(Customer customer, String email) {
-        if (email != null && !email.isBlank()) {
-            customer.setEmail(email);
-        }
-    }
-
-    private void updateGender(Customer customer, GenderType gender) {
-        if (gender != null) {
-            customer.setGender(gender);
-        }
-    }
-
-    private void updatePhone(Customer customer, String phone) {
-        if (phone != null && !phone.isBlank()) {
-            customer.setPhone(phone);
-        }
+        customer.setDob(dob);
+        LocalDate currentDate = LocalDate.now();
+        customer.setAge(Period.between(dob, currentDate).getYears());
     }
 }

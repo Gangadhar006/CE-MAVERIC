@@ -1,6 +1,7 @@
 package org.maveric.currencyexchange.controller;
 
-import org.maveric.currencyexchange.dtos.AccountDto;
+import org.maveric.currencyexchange.payload.AccountRequest;
+import org.maveric.currencyexchange.payload.AccountResponse;
 import org.maveric.currencyexchange.service.IAccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,32 +22,32 @@ public class AccountController {
     }
 
     @PostMapping
-    public ResponseEntity<AccountDto> createAccount(@PathVariable("customerId") Long customerId,
-                                                    @RequestBody AccountDto accountDto) {
+    public ResponseEntity<AccountResponse> createAccount(@PathVariable long customerId,
+                                                         @RequestBody AccountRequest accountRequest) {
         logger.info("Requesting account creation");
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(accountService.createAccount(customerId, accountDto));
+                .body(accountService.createAccount(customerId, accountRequest));
     }
 
     @PutMapping(value = "/{accountId}")
-    public ResponseEntity<AccountDto> updateAccount(@PathVariable("customerId") Long customerId,
-                                                    @PathVariable("accountId") Long accountId,
-                                                    @RequestBody AccountDto accountDto) {
+    public ResponseEntity<AccountResponse> updateAccount(@PathVariable long customerId,
+                                                         @PathVariable long accountId,
+                                                         @RequestBody AccountRequest accountRequest) {
         logger.info("Requesting account updation");
         return ResponseEntity.status(HttpStatus.OK)
-                .body(accountService.updateAccount(customerId, accountId, accountDto));
+                .body(accountService.updateAccount(customerId, accountId, accountRequest));
     }
 
     @GetMapping
-    public ResponseEntity<List<AccountDto>> findAllAccounts(@PathVariable("customerId") Long customerId) {
+    public ResponseEntity<List<AccountResponse>> findAllAccounts(@PathVariable long customerId) {
         logger.info("Requesting account fetching");
         return ResponseEntity.status(HttpStatus.OK)
                 .body(accountService.findAllAccounts(customerId));
     }
 
     @DeleteMapping(value = "/{accountId}")
-    public ResponseEntity<String> deleteAccount(@PathVariable("customerId") Long customerId,
-                                                @PathVariable("accountId") Long accountId) {
+    public ResponseEntity<String> deleteAccount(@PathVariable("customerId") long customerId,
+                                                @PathVariable("accountId") long accountId) {
         logger.info("Requesting account deletion");
         return ResponseEntity.status(HttpStatus.OK)
                 .body(accountService.deleteAccount(customerId, accountId));

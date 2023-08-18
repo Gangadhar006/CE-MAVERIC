@@ -1,4 +1,4 @@
-package org.maveric.currencyexchange.dtos;
+package org.maveric.currencyexchange.payload;
 
 import lombok.Getter;
 import lombok.Setter;

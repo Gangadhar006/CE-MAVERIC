@@ -1,15 +1,16 @@
 package org.maveric.currencyexchange.service;
 
-import org.maveric.currencyexchange.dtos.CustomerDto;
+import org.maveric.currencyexchange.payload.CustomerRequest;
+import org.maveric.currencyexchange.payload.CustomerResponse;
 
 import java.util.List;
 
 public interface ICustomerService {
-    CustomerDto createCustomer(CustomerDto customerDto);
+    CustomerResponse createCustomer(CustomerRequest customerRequest);
 
-    CustomerDto updateCustomer(Long customerId, CustomerDto customerDto);
+    CustomerResponse updateCustomer(long customerId, CustomerRequest customerRequest);
 
-    List<CustomerDto> findAllCustomers();
+    List<CustomerResponse> findAllCustomers();
 
-    String deleteCustomer(Long id);
+    String deleteCustomer(long id);
 }

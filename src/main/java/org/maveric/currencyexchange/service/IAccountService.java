@@ -1,15 +1,16 @@
 package org.maveric.currencyexchange.service;
 
-import org.maveric.currencyexchange.dtos.AccountDto;
+import org.maveric.currencyexchange.payload.AccountRequest;
+import org.maveric.currencyexchange.payload.AccountResponse;
 
 import java.util.List;
 
 public interface IAccountService {
-    AccountDto createAccount(Long accountId, AccountDto accountDto);
+    AccountResponse createAccount(long accountId, AccountRequest accountDto);
 
-    AccountDto updateAccount(Long customerId, Long accountId, AccountDto accountDto);
+    AccountResponse updateAccount(long customerId, long accountId, AccountRequest accountDto);
 
-    String deleteAccount(Long customerId,Long accountId);
+    String deleteAccount(long customerId, long accountId);
 
-    List<AccountDto> findAllAccounts(Long id);
+    List<AccountResponse> findAllAccounts(long id);
 }

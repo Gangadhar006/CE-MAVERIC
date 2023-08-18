@@ -1,6 +1,7 @@
 package org.maveric.currencyexchange.controller;
 
-import org.maveric.currencyexchange.dtos.CustomerDto;
+import org.maveric.currencyexchange.payload.CustomerRequest;
+import org.maveric.currencyexchange.payload.CustomerResponse;
 import org.maveric.currencyexchange.service.ICustomerService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -23,31 +24,31 @@ public class CustomerController {
     }
 
     @PostMapping
-    public ResponseEntity<CustomerDto> createCustomer(@Valid @RequestBody CustomerDto customerDto) {
+    public ResponseEntity<CustomerResponse> createCustomer(@Valid @RequestBody CustomerRequest customerRequest) {
         logger.info("Requesting customer creation");
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(customerService.createCustomer(customerDto));
+                .body(customerService.createCustomer(customerRequest));
     }
 
     @PutMapping(value = "/{customerId}")
-    public ResponseEntity<CustomerDto> updateCustomer(
-            @PathVariable("customerId") Long customerId,
-            @Valid @RequestBody CustomerDto customerDto) {
+    public ResponseEntity<CustomerResponse> updateCustomer(
+            @PathVariable long customerId,
+            @Valid @RequestBody CustomerRequest customerRequest) {
         logger.info("Requesting customer updation for CUSTOMER");
         return ResponseEntity.status(HttpStatus.OK)
-                .body(customerService.updateCustomer(customerId, customerDto));
+                .body(customerService.updateCustomer(customerId, customerRequest));
 
     }
 
     @GetMapping
-    public ResponseEntity<List<CustomerDto>> findAllCustomers() {
+    public ResponseEntity<List<CustomerResponse>> findAllCustomers() {
         logger.info("Requesting for all customers fetching");
         return ResponseEntity.status(HttpStatus.OK)
                 .body(customerService.findAllCustomers());
     }
 
     @DeleteMapping(value = "/{customerId}")
-    public ResponseEntity<String> deleteCustomer(@PathVariable("customerId") Long customerId) {
+    public ResponseEntity<String> deleteCustomer(@PathVariable long customerId) {
         logger.info("Requesting customer deletion for CUSTOMER");
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(customerService.deleteCustomer(customerId));
     }

@@ -1,5 +1,6 @@
 package org.maveric.currencyexchange.entity;
 
+import lombok.ToString;
 import org.maveric.currencyexchange.enums.GenderType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 
 @Entity
 public class Customer {
@@ -46,6 +48,12 @@ public class Customer {
             fetch = FetchType.EAGER
     )
     private List<Account> accounts;
+
+    @OneToMany(
+            mappedBy = "customer",
+            fetch = FetchType.EAGER
+    )
+    private List<Transaction> transactions;
 
     @PrePersist
     private void prePersist() {

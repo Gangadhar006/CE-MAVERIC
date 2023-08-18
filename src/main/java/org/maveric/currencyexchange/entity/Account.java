@@ -1,11 +1,12 @@
 package org.maveric.currencyexchange.entity;
 
-import org.maveric.currencyexchange.enums.AccountType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.maveric.currencyexchange.enums.AccountType;
+import org.maveric.currencyexchange.enums.CurrencyType;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -31,10 +32,8 @@ public class Account {
     @JoinColumn(name = "customer_id")
     private Customer customer;
     @Column(nullable = false)
-    private String currency;
-
-//    @OneToMany(mappedBy = "account")
-//    private List<Transaction> transactions;
+    @Enumerated(EnumType.STRING)
+    private CurrencyType currency;
 
     @PrePersist
     public void prePersist() {

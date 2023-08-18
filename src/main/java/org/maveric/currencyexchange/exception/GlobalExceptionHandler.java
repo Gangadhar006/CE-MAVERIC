@@ -1,6 +1,6 @@
 package org.maveric.currencyexchange.exception;
 
-import org.maveric.currencyexchange.dtos.ErrorResponse;
+import org.maveric.currencyexchange.payload.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -22,7 +22,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccountMisMatchException.class)
     public ResponseEntity<ErrorResponse> accountMisMatch(AccountMisMatchException exception) {
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND, exception.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_ACCEPTABLE, exception.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+    }
+
+    @ExceptionHandler(InsufficientFundsException.class)
+    public ResponseEntity<ErrorResponse> insufficientFunds(InsufficientFundsException exception) {
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_ACCEPTABLE, exception.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
+    }
+
+    @ExceptionHandler(AccountConflictException.class)
+    public ResponseEntity<ErrorResponse> sameAccount(AccountConflictException exception) {
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_ACCEPTABLE, exception.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
     }
 }

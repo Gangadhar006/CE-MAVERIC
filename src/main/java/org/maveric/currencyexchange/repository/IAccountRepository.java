@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface IAccountRepository extends JpaRepository<Account, Long> {
-    List<Account> findByCustomerId(Long id);
+    List<Account> findByCustomerId(Long customerId);
 }
