@@ -1,5 +1,6 @@
 package org.maveric.currencyexchange.controller;
 
+import jakarta.validation.Valid;
 import org.maveric.currencyexchange.payload.OrderRequest;
 import org.maveric.currencyexchange.payload.OrderResponse;
 import org.maveric.currencyexchange.repository.ITransactionRepository;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/customers/{customerId}/transactions")
+@RequestMapping(value = "/customers/{customerId}/orders")
 public class OrderController {
     private static final Logger log = LoggerFactory.getLogger(OrderController.class);
     private IOrderService orderService;
@@ -33,7 +34,7 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<OrderResponse> createTransaction(@PathVariable long customerId,
-                                                           @RequestBody OrderRequest orderRequest) {
+                                                           @Valid @RequestBody OrderRequest orderRequest) {
         log.info("Requesting for Creating Transaction");
         return ResponseEntity.status(HttpStatus.OK).body(orderService.createTransaction(customerId, orderRequest));
     }

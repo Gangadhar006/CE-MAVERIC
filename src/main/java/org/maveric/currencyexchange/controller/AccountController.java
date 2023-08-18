@@ -1,5 +1,6 @@
 package org.maveric.currencyexchange.controller;
 
+import jakarta.validation.Valid;
 import org.maveric.currencyexchange.payload.AccountRequest;
 import org.maveric.currencyexchange.payload.AccountResponse;
 import org.maveric.currencyexchange.service.IAccountService;
@@ -23,7 +24,7 @@ public class AccountController {
 
     @PostMapping
     public ResponseEntity<AccountResponse> createAccount(@PathVariable long customerId,
-                                                         @RequestBody AccountRequest accountRequest) {
+                                                         @Valid @RequestBody AccountRequest accountRequest) {
         logger.info("Requesting account creation");
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(accountService.createAccount(customerId, accountRequest));
@@ -32,7 +33,7 @@ public class AccountController {
     @PutMapping(value = "/{accountId}")
     public ResponseEntity<AccountResponse> updateAccount(@PathVariable long customerId,
                                                          @PathVariable long accountId,
-                                                         @RequestBody AccountRequest accountRequest) {
+                                                         @Valid @RequestBody AccountRequest accountRequest) {
         logger.info("Requesting account updation");
         return ResponseEntity.status(HttpStatus.OK)
                 .body(accountService.updateAccount(customerId, accountId, accountRequest));
