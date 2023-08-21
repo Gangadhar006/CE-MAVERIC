@@ -13,5 +13,6 @@ public class AccountResponse {
     private BigDecimal amount;
     private AccountType accountType;
     private boolean active;
+    private String accountNumber;
     private CurrencyType currency;
 }

@@ -7,14 +7,40 @@ import org.hibernate.id.IdentifierGenerator;
 import java.io.Serializable;
 import java.util.UUID;
 
-public class AccountNumberGenerator implements IdentifierGenerator {
+import org.maveric.currencyexchange.entity.Account;
+import org.maveric.currencyexchange.exception.AccountNotFoundException;
+import org.maveric.currencyexchange.repository.IAccountRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-    private static final String PREFIX = "ACCN";
+import java.util.Random;
 
-    @Override
-    public Serializable generate(SharedSessionContractImplementor session, Object object) throws HibernateException {
-        String uuid = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 5);
-        return PREFIX + "-" + uuid;
+@Service
+public class AccountNumberGenerator {
+
+    private static final String PREFIX = "ACCN-";
+
+    private final IAccountRepository accountRepository;
+
+    @Autowired
+    public AccountNumberGenerator(IAccountRepository accountRepository) {
+        this.accountRepository = accountRepository;
+    }
+
+    public String generateUniqueAccountNumber(long id) {
+        Random random = new Random();
+        String accountNumber;
+
+        do {
+            int randomNumber = random.nextInt(900000) + 100000;
+            Account account = accountRepository.findById(id).orElseThrow(
+                    () -> {
+                        throw new AccountNotFoundException("Account not found");
+                    }
+            );
+            accountNumber = PREFIX + account.getCurrency().name() + "-" + randomNumber;
+        } while (accountRepository.existsByAccountNumber(accountNumber));
+
+        return accountNumber;
     }
 }
-

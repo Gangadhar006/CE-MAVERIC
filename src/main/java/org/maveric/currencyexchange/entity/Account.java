@@ -20,6 +20,8 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Column(unique = true)
+    private String accountNumber;
     private BigDecimal amount;
     @Column(nullable = false)
     private Boolean active;

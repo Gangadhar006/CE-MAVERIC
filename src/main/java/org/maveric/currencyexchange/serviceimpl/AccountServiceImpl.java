@@ -10,6 +10,7 @@ import org.maveric.currencyexchange.payload.AccountResponse;
 import org.maveric.currencyexchange.repository.IAccountRepository;
 import org.maveric.currencyexchange.repository.ICustomerRepository;
 import org.maveric.currencyexchange.service.IAccountService;
+import org.maveric.currencyexchange.utils.AccountNumberGenerator;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +25,10 @@ public class AccountServiceImpl implements IAccountService {
     private ModelMapper mapper;
     private IAccountRepository accountRepo;
     private ICustomerRepository customerRepo;
+    private AccountNumberGenerator accountNumberGenerator;
 
-    public AccountServiceImpl(ModelMapper mapper, IAccountRepository accountRepo, ICustomerRepository customerRepo) {
+    public AccountServiceImpl(ModelMapper mapper, IAccountRepository accountRepo, ICustomerRepository customerRepo, AccountNumberGenerator accountNumberGenerator) {
+        this.accountNumberGenerator = accountNumberGenerator;
         this.accountRepo = accountRepo;
         this.customerRepo = customerRepo;
         this.mapper = mapper;
@@ -38,6 +41,8 @@ public class AccountServiceImpl implements IAccountService {
         Account account = mapper.map(accountRequest, Account.class);
         account.setCustomer(customer);
         account = accountRepo.save(account);
+        String accountNumber = accountNumberGenerator.generateUniqueAccountNumber(account.getId());
+        account.setAccountNumber(accountNumber);
         logger.info("Account created successfully for CUSTOMER");
         return mapper.map(account, AccountResponse.class);
     }
