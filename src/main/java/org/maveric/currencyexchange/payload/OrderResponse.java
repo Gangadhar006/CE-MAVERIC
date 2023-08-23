@@ -8,10 +8,11 @@ import java.util.Date;
 @Getter
 @Setter
 public class OrderResponse {
-    private long srcAccount;
-    private long destAccount;
+    private String srcAccount;
+    private String destAccount;
     private double amount;
     private Date time;
     private double rate;
     private String currencyPair;
+    private String  totalValue;
 }

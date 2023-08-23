@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -18,14 +17,21 @@ public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private Long srcAccount;
-    private Long destAccount;
+    private String srcAccount;
+    private String destAccount;
     private Double amount;
+    private String totalValue;
     @CreationTimestamp
     private Date time;
     private Double rate;
     private String currencyPair;
-
     @ManyToOne
     private Customer customer;
+
+    @PrePersist
+    public void calculateValue() {
+        totalValue = String.format("%.3f", rate * amount)
+                .concat(" ")
+                .concat(currencyPair.substring(4, 7));
+    }
 }

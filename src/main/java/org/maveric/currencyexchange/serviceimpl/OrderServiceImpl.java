@@ -60,6 +60,28 @@ public class OrderServiceImpl implements IOrderService {
                 .toList();
     }
 
+    private void validateAccounts(Account srcAccount, Account destAccount, List<Account> accounts) {
+        if (srcAccount.equals(destAccount)) {
+            logger.error("source & destination accounts should be different");
+            throw new AccountConflictException("Can't Transfer to the Same Account");
+        }
+        if (!accounts.contains(srcAccount) || !accounts.contains(destAccount)) {
+            logger.error("Account Mis Match");
+            throw new AccountMisMatchException("It's Not Your Account");
+        }
+    }
+
+    private void performTransaction(OrderRequest orderRequest, Account srcAccount, Account destAccount, double destRate) {
+        double sufficientAmount = srcAccount.getAmount().doubleValue();
+        if (orderRequest.getAmount() > sufficientAmount)
+            throw new InsufficientFundsException("Max Amount you can send: " + sufficientAmount);
+        else {
+            logger.info("Transaction Initiated...");
+            srcAccount.setAmount(srcAccount.getAmount().subtract(BigDecimal.valueOf(orderRequest.getAmount())));
+            destAccount.setAmount(destAccount.getAmount().add(BigDecimal.valueOf(orderRequest.getAmount() * destRate)));
+        }
+    }
+
     @Override
     @Transactional
     public OrderResponse createTransaction(long customerId, OrderRequest orderRequest) {
@@ -73,29 +95,13 @@ public class OrderServiceImpl implements IOrderService {
         Account srcAccount = getAccountOrThrow(orderRequest.getSrcAccount(), "Source");
         Account destAccount = getAccountOrThrow(orderRequest.getDestAccount(), "Destination");
 
-        if (srcAccount.equals(destAccount)) {
-            logger.error("source & destination accounts should be different");
-            throw new AccountConflictException("Can't Transfer to the Same Account");
-        }
-
-        if (!accounts.contains(srcAccount) || !accounts.contains(destAccount)) {
-            logger.error("Account Mis Match");
-            throw new AccountMisMatchException("It's Not Your Account");
-        }
+        validateAccounts(srcAccount, destAccount, accounts);
 
         String srcCurrency = srcAccount.getCurrency().name();
         String destCurrency = destAccount.getCurrency().name();
 
         double destRate = exchangeService.getLatestExchangeRates(srcCurrency).getRates().get(destCurrency);
-        double sufficientAmount = srcAccount.getAmount().doubleValue();
-
-        if (orderRequest.getAmount() > sufficientAmount)
-            throw new InsufficientFundsException("Max Amount you can send: " + sufficientAmount);
-        else {
-            logger.info("Transaction Initiated...");
-            srcAccount.setAmount(srcAccount.getAmount().subtract(BigDecimal.valueOf(orderRequest.getAmount())));
-            destAccount.setAmount(destAccount.getAmount().add(BigDecimal.valueOf(orderRequest.getAmount() * destRate)));
-        }
+        performTransaction(orderRequest, srcAccount, destAccount, destRate);
 
         Transaction transaction = mapper.map(orderRequest, Transaction.class);
         transaction.setCustomer(customer);
@@ -108,9 +114,9 @@ public class OrderServiceImpl implements IOrderService {
         return mapper.map(transaction, OrderResponse.class);
     }
 
-    private Account getAccountOrThrow(long accountId, String accountType) {
+    private Account getAccountOrThrow(String accountId, String accountType) {
         logger.info("verifying customer account");
-        return accountRepo.findById(accountId)
+        return accountRepo.findByAccountNumber(accountId)
                 .orElseThrow(() -> {
                     logger.error("{} Account Not Found", accountType);
                     throw new AccountNotFoundException(accountType + " Account Not Found");

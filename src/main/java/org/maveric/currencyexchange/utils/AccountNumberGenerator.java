@@ -1,12 +1,5 @@
 package org.maveric.currencyexchange.utils;
 
-import org.hibernate.HibernateException;
-import org.hibernate.engine.spi.SharedSessionContractImplementor;
-import org.hibernate.id.IdentifierGenerator;
-
-import java.io.Serializable;
-import java.util.UUID;
-
 import org.maveric.currencyexchange.entity.Account;
 import org.maveric.currencyexchange.exception.AccountNotFoundException;
 import org.maveric.currencyexchange.repository.IAccountRepository;
@@ -19,6 +12,8 @@ import java.util.Random;
 public class AccountNumberGenerator {
 
     private static final String PREFIX = "ACCN-";
+    private static final int MIN_RANDOM_NUMBER = 100000;
+    private static final int MAX_RANDOM_NUMBER = 900000;
 
     private final IAccountRepository accountRepository;
 
@@ -32,13 +27,13 @@ public class AccountNumberGenerator {
         String accountNumber;
 
         do {
-            int randomNumber = random.nextInt(900000) + 100000;
+            int randomNumber = random.nextInt(MAX_RANDOM_NUMBER) + MIN_RANDOM_NUMBER;
             Account account = accountRepository.findById(id).orElseThrow(
                     () -> {
                         throw new AccountNotFoundException("Account not found");
                     }
             );
-            accountNumber = PREFIX + account.getCurrency().name() + "-" + randomNumber;
+            accountNumber = PREFIX + account.getCurrency().name().concat("-").concat(String.valueOf(randomNumber));
         } while (accountRepository.existsByAccountNumber(accountNumber));
 
         return accountNumber;

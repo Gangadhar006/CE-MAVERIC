@@ -49,6 +49,7 @@ public class CustomerServiceImpl implements ICustomerService {
         customer.setEmail(customerRequest.getEmail());
         customer.setGender(customerRequest.getGender());
         customer.setPhone(customerRequest.getPhone());
+
         updateDobAndAge(customer, customerRequest.getDob());
 
         logger.info(" Successfully updated Customer");

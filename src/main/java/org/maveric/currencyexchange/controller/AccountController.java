@@ -1,6 +1,7 @@
 package org.maveric.currencyexchange.controller;
 
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.maveric.currencyexchange.payload.AccountRequest;
 import org.maveric.currencyexchange.payload.AccountResponse;
 import org.maveric.currencyexchange.service.IAccountService;

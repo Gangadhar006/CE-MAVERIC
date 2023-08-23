@@ -1,14 +1,15 @@
 package org.maveric.currencyexchange.payload;
 
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.maveric.currencyexchange.enums.GenderType;
 
 import java.time.LocalDate;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class CustomerRequest {
     @NotBlank(message = "First name is required")
     @Pattern(regexp = "^[A-Za-z]+$", message = "Only alphabetic characters are allowed")

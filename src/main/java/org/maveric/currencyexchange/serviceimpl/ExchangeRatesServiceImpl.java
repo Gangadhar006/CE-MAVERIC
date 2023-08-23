@@ -9,14 +9,15 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class ExchangeRatesServiceImpl implements IExchangeRatesService {
 
-    @Value("${exchange-rates.api-url}")
     private String API_URL;
+
+    public ExchangeRatesServiceImpl(@Value("${exchange-rates.api-url}") String API_URL) {
+        this.API_URL = API_URL;
+    }
 
     private final RestTemplate restTemplate = new RestTemplate();
 
     public ExchangeRates getLatestExchangeRates(String baseCurrency) {
-        //deserializing json response into java object
         return restTemplate.getForObject(API_URL.concat(baseCurrency), ExchangeRates.class);
     }
 }
-
