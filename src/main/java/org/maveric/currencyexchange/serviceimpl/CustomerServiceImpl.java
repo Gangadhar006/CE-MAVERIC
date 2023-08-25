@@ -30,36 +30,22 @@ public class CustomerServiceImpl implements ICustomerService {
     @Transactional
     @Override
     public CustomerResponse createCustomer(CustomerRequest customerRequest) {
-        logger.info("Creating Customer");
         Customer customer = mapper.map(customerRequest, Customer.class);
         customer = customerRepo.save(customer);
-        logger.info("Created Customer Successfully");
         return mapper.map(customer, CustomerResponse.class);
     }
 
     @Transactional
     @Override
     public CustomerResponse updateCustomer(long customerId, CustomerRequest customerRequest) {
-        logger.info("Updating Customer");
-
         Customer customer = verifyCustomer(customerId);
-
-        customer.setFirstName(customerRequest.getFirstName());
-        customer.setLastName(customerRequest.getLastName());
-        customer.setEmail(customerRequest.getEmail());
-        customer.setGender(customerRequest.getGender());
-        customer.setPhone(customerRequest.getPhone());
-
+        mapper.map(customerRequest, customer);
         updateDobAndAge(customer, customerRequest.getDob());
-
-        logger.info(" Successfully updated Customer");
-
         return mapper.map(customer, CustomerResponse.class);
     }
 
     @Override
     public List<CustomerResponse> findAllCustomers() {
-        logger.info(" Fetching All Customers");
         List<Customer> customers = customerRepo.findAll();
         return customers.stream()
                 .map(customer -> mapper.map(customer, CustomerResponse.class))
@@ -69,21 +55,19 @@ public class CustomerServiceImpl implements ICustomerService {
     @Override
     @Transactional
     public String deleteCustomer(long customerId) {
-        logger.info(" Deleting Customer");
         Customer customer = verifyCustomer(customerId);
-
         customerRepo.delete(customer);
-        logger.info(" Successfully Deleted Customer");
         return "Customer Deleted Successfully";
     }
 
+    @Override
+    public CustomerResponse findCustomer(long customerId) {
+        Customer customer = verifyCustomer(customerId);
+        return mapper.map(customer, CustomerResponse.class);
+    }
+
     public Customer verifyCustomer(long customerId) {
-        return customerRepo.findById(customerId).orElseThrow(
-                () -> {
-                    logger.error("Customer Not Found");
-                    return new CustomerNotFoundException("Customer Not Found");
-                }
-        );
+        return customerRepo.findById(customerId).orElseThrow(CustomerNotFoundException::new);
     }
 
     private void updateDobAndAge(Customer customer, LocalDate dob) {

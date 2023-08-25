@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 @Entity
 public class Security {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "security_seq_generator")
+    @SequenceGenerator(name = "security_seq_generator", sequenceName = "security_seq", allocationSize = 1)
     private long id;
     private String email;
     private String password;

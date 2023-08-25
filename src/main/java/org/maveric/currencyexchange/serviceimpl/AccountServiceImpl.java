@@ -21,7 +21,6 @@ import java.util.List;
 
 @Service
 public class AccountServiceImpl implements IAccountService {
-    public static final Logger logger = LoggerFactory.getLogger(AccountServiceImpl.class);
     private ModelMapper mapper;
     private IAccountRepository accountRepo;
     private ICustomerRepository customerRepo;
@@ -43,40 +42,38 @@ public class AccountServiceImpl implements IAccountService {
         account = accountRepo.save(account);
         String accountNumber = accountNumberGenerator.generateUniqueAccountNumber(account.getId());
         account.setAccountNumber(accountNumber);
-        logger.info("Account created successfully for CUSTOMER");
         return mapper.map(account, AccountResponse.class);
     }
 
 
     @Override
     @Transactional
-    public AccountResponse updateAccount(long customerId, long accountId, AccountRequest accountRequest) {
-        logger.info("Updating account with CUSTOMER");
+    public AccountResponse updateAccount(long customerId, String accountNumber, AccountRequest accountRequest) {
         verfiyCustomer(customerId);
-        return updateAccountUtil(customerId, accountId, accountRequest);
+        return updateAccountUtil(customerId, accountNumber, accountRequest);
     }
 
-    public AccountResponse updateAccountUtil(long customerId, long accountId, AccountRequest accountRequest) {
-        Account account = verifyAccount(accountId, customerId);
-        account.setAmount(accountRequest.getAmount());
-        account.setAccountType(accountRequest.getAccountType());
-        account.setCurrency(accountRequest.getCurrency());
+    public AccountResponse updateAccountUtil(long customerId, String accountNumber, AccountRequest accountRequest) {
+        Account account = verifyAccount(accountNumber, customerId);
+//        account.setAmount(accountRequest.getAmount());
+//        account.setAccountType(accountRequest.getAccountType());
+//        account.setCurrency(accountRequest.getCurrency());
+        mapper.map(accountRequest, account);
         account = accountRepo.save(account);
+
         return mapper.map(account, AccountResponse.class);
     }
 
     @Override
     @Transactional
-    public String deleteAccount(long customerId, long accountId) {
-        Account account = verifyAccount(accountId, customerId);
+    public String deleteAccount(long customerId, String accountNumber) {
+        Account account = verifyAccount(accountNumber, customerId);
         accountRepo.delete(account);
-        logger.info("Account deleted successfully");
         return "account deleted successfully";
     }
 
     @Override
     public List<AccountResponse> findAllAccounts(long customerId) {
-        logger.info("Fetching All Customers with CUSTOMER-ID");
         verfiyCustomer(customerId);
         List<Account> accounts = accountRepo.findByCustomerId(customerId);
         return accounts.stream()
@@ -84,29 +81,24 @@ public class AccountServiceImpl implements IAccountService {
                 .toList();
     }
 
-    public Account verifyAccount(long accountId, long customerId) {
-        Account account = accountRepo.findById(accountId).orElseThrow(
-                () -> {
-                    logger.error("Account Not Found");
-                    throw new AccountNotFoundException("Account Not Found");
-                }
-        );
+    @Override
+    public AccountResponse findAccount(long customerId, String accountNumber) {
+        Account account = verifyAccount(accountNumber, customerId);
+        return mapper.map(account, AccountResponse.class);
+    }
+
+    public Account verifyAccount(String accountNumber, long customerId) {
+        Account account = accountRepo.findByAccountNumber(accountNumber).orElseThrow(AccountNotFoundException::new);
 
         boolean isAccountOwner = account.getCustomer().getId().equals(customerId);
 
         if (!isAccountOwner) {
-            logger.error("Account Mis Match CUSTOMER");
-            throw new AccountMisMatchException("It's Not Your Account");
+            throw new AccountMisMatchException();
         }
         return account;
     }
 
     public Customer verfiyCustomer(long customerId) {
-        return customerRepo.findById(customerId).orElseThrow(
-                () -> {
-                    logger.error("Customer Not Found");
-                    throw new CustomerNotFoundException("Customer Not Found");
-                }
-        );
+        return customerRepo.findById(customerId).orElseThrow(CustomerNotFoundException::new);
     }
 }

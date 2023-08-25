@@ -22,7 +22,8 @@ import java.util.List;
 @Entity
 public class Customer {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "customer_seq_generator")
+    @SequenceGenerator(name = "customer_seq_generator", sequenceName = "customer_seq", allocationSize = 1)
     private Long id;
     @Column(nullable = false)
     private String firstName;
@@ -45,7 +46,7 @@ public class Customer {
     @OneToMany(
             mappedBy = "customer",
             cascade = CascadeType.ALL,
-            fetch = FetchType.EAGER
+                fetch = FetchType.EAGER
     )
     private List<Account> accounts;
 

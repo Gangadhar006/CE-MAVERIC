@@ -18,7 +18,8 @@ import java.util.Date;
 @Entity
 public class Account {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "account_seq_generator")
+    @SequenceGenerator(name = "account_seq_generator", sequenceName = "account_seq", allocationSize = 1)
     private Long id;
     @Column(unique = true)
     private String accountNumber;

@@ -6,11 +6,13 @@ import org.maveric.currencyexchange.payload.AccountResponse;
 import java.util.List;
 
 public interface IAccountService {
-    AccountResponse createAccount(long accountId, AccountRequest accountDto);
+    AccountResponse createAccount(long customerId, AccountRequest accountDto);
 
-    AccountResponse updateAccount(long customerId, long accountId, AccountRequest accountDto);
+    AccountResponse updateAccount(long customerId, String accountNumber, AccountRequest accountDto);
 
-    String deleteAccount(long customerId, long accountId);
+    String deleteAccount(long customerId, String accountNumber);
 
     List<AccountResponse> findAllAccounts(long id);
+
+    AccountResponse findAccount(long customerId, String accountNumber);
 }

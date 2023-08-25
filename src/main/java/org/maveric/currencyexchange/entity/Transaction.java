@@ -15,7 +15,8 @@ import java.util.Date;
 @Entity
 public class Transaction {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "transaction_seq_generator")
+    @SequenceGenerator(name = "transaction_seq_generator", sequenceName = "transaction_seq", allocationSize = 1)
     private Long id;
     private String srcAccount;
     private String destAccount;

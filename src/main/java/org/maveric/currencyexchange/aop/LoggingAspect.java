@@ -19,14 +19,14 @@ public class LoggingAspect {
     @Before("logging()")
     public void logMethodEntry(JoinPoint joinPoint) {
         String methodName = joinPoint.getSignature().getName();
-        String className = joinPoint.getSignature().getClass().getSimpleName();
+        String className = joinPoint.getSignature().getClass().getName();
         logger.info("Entering method: '{}\'' class: '{}\''", methodName, className);
     }
 
     @After("logging()")
     public void logMethodExit(JoinPoint joinPoint) {
         String methodName = joinPoint.getSignature().getName();
-        String className = joinPoint.getSignature().getClass().getSimpleName();
+        String className = joinPoint.getSignature().getClass().getName();
         logger.info("Exiting method: '{}\'' class: '{}\''", methodName, className);
     }
 }

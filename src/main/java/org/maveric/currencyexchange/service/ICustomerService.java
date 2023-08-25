@@ -13,4 +13,6 @@ public interface ICustomerService {
     List<CustomerResponse> findAllCustomers();
 
     String deleteCustomer(long id);
+
+    CustomerResponse findCustomer(long customerId);
 }

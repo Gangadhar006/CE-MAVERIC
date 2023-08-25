@@ -4,6 +4,7 @@ import org.maveric.currencyexchange.entity.Account;
 import org.maveric.currencyexchange.exception.AccountNotFoundException;
 import org.maveric.currencyexchange.repository.IAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
@@ -11,9 +12,12 @@ import java.util.Random;
 @Service
 public class AccountNumberGenerator {
 
-    private static final String PREFIX = "ACCN-";
-    private static final int MIN_RANDOM_NUMBER = 100000;
-    private static final int MAX_RANDOM_NUMBER = 900000;
+    @Value("${account.prefix}")
+    private String prefix;
+    @Value("${randomMin}")
+    private int minRandomNumber;
+    @Value("${randomMax}")
+    private int maxRandomNumber;
 
     private final IAccountRepository accountRepository;
 
@@ -25,15 +29,10 @@ public class AccountNumberGenerator {
     public String generateUniqueAccountNumber(long id) {
         Random random = new Random();
         String accountNumber;
-
         do {
-            int randomNumber = random.nextInt(MAX_RANDOM_NUMBER) + MIN_RANDOM_NUMBER;
-            Account account = accountRepository.findById(id).orElseThrow(
-                    () -> {
-                        throw new AccountNotFoundException("Account not found");
-                    }
-            );
-            accountNumber = PREFIX + account.getCurrency().name().concat("-").concat(String.valueOf(randomNumber));
+            int randomNumber = random.nextInt(maxRandomNumber) + minRandomNumber;
+            Account account = accountRepository.findById(id).orElseThrow(AccountNotFoundException::new);
+            accountNumber = prefix.concat(account.getCurrency().name().concat(String.valueOf(randomNumber)));
         } while (accountRepository.existsByAccountNumber(accountNumber));
 
         return accountNumber;

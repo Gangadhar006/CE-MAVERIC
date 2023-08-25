@@ -13,9 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/customers")
+@RequestMapping(value = "/customer")
 public class CustomerController {
-    private static final Logger logger = LoggerFactory.getLogger(CustomerController.class);
 
     private ICustomerService customerService;
 
@@ -23,33 +22,31 @@ public class CustomerController {
         this.customerService = customerService;
     }
 
-    @PostMapping
+    @PostMapping(value = "/create")
     public ResponseEntity<CustomerResponse> createCustomer(@Valid @RequestBody CustomerRequest customerRequest) {
-        logger.info("Requesting customer creation");
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(customerService.createCustomer(customerRequest));
+        return ResponseEntity.status(HttpStatus.CREATED).body(customerService.createCustomer(customerRequest));
     }
 
-    @PutMapping(value = "/{customerId}")
+    @PutMapping(value = "/update/{customerId}")
     public ResponseEntity<CustomerResponse> updateCustomer(
             @PathVariable long customerId,
             @Valid @RequestBody CustomerRequest customerRequest) {
-        logger.info("Requesting customer updation for CUSTOMER");
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(customerService.updateCustomer(customerId, customerRequest));
+        return ResponseEntity.status(HttpStatus.OK).body(customerService.updateCustomer(customerId, customerRequest));
 
     }
 
-    @GetMapping
+    @GetMapping(value = "/fetchAll")
     public ResponseEntity<List<CustomerResponse>> findAllCustomers() {
-        logger.info("Requesting for all customers fetching");
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(customerService.findAllCustomers());
+        return ResponseEntity.status(HttpStatus.OK).body(customerService.findAllCustomers());
     }
 
-    @DeleteMapping(value = "/{customerId}")
+    @GetMapping(value = "/fetch/{customerId}")
+    public ResponseEntity<CustomerResponse> findCustomer(@PathVariable long customerId) {
+        return ResponseEntity.status(HttpStatus.OK).body(customerService.findCustomer(customerId));
+    }
+
+    @DeleteMapping(value = "/delete/{customerId}")
     public ResponseEntity<String> deleteCustomer(@PathVariable long customerId) {
-        logger.info("Requesting customer deletion for CUSTOMER");
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(customerService.deleteCustomer(customerId));
     }
 }

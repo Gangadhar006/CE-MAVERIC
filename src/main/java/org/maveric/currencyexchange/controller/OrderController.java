@@ -4,8 +4,6 @@ import jakarta.validation.Valid;
 import org.maveric.currencyexchange.payload.OrderRequest;
 import org.maveric.currencyexchange.payload.OrderResponse;
 import org.maveric.currencyexchange.service.IOrderService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,26 +11,26 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/customers/{customerId}/orders")
-@CrossOrigin(origins = "http://localhost:4200/")
+@RequestMapping(value = "/orders")
+@CrossOrigin(origins = "${corsAllowedOrigin}")
 public class OrderController {
-    private static final Logger log = LoggerFactory.getLogger(OrderController.class);
     private IOrderService orderService;
 
     public OrderController(IOrderService orderService) {
         this.orderService = orderService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<OrderResponse>> fetchAllTransactions(@PathVariable long customerId) {
-        log.info("Requesting for Fetching all Transactions");
-        return ResponseEntity.status(HttpStatus.OK).body(orderService.fetchAllTransactions(customerId));
+    @GetMapping(value = "/watchlist/{customerId}")
+    public ResponseEntity<List<OrderResponse>> fetchAllTransactions(
+            @RequestParam(defaultValue = "${page.default}") Integer page,
+            @RequestParam(defaultValue = "${size.default}") Integer size,
+            @PathVariable long customerId) {
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.fetchAllTransactions(page, size, customerId));
     }
 
-    @PostMapping
+    @PostMapping(value = "/placeorder/{customerId}")
     public ResponseEntity<OrderResponse> createTransaction(@PathVariable long customerId,
                                                            @Valid @RequestBody OrderRequest orderRequest) {
-        log.info("Requesting for Creating Transaction");
         return ResponseEntity.status(HttpStatus.OK).body(orderService.createTransaction(customerId, orderRequest));
     }
 }
